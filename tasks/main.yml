@@ -1,0 +1,26 @@
+---
+
+- stat: path=/etc/apache2/conf-enabled
+  register: apache_conf
+- stat: path=/etc/nginx/conf.d
+  register: nginx_conf
+
+# This works with a host variable like this:
+# myhost.meissner.it mit_php_fpm_ports=9000,9001,9002,9003
+- template: src=local-php.include dest=/etc/apache2/conf-available/local-php-{{ item }}.include
+  with_items: "{{mit_php_fpm_ports}}"
+  notify: Restart apache
+  when: apache_conf.stat.exists
+
+- name: Copy config file to /etc/nginx/conf.d/
+  copy: src={{ item }} dest=/etc/nginx/conf.d/
+  with_items:
+    - local-php-v2.include
+    - local-wordpress.include
+    - local-mit-nextcloud.include
+  when: nginx_conf.stat.exists
+
+# oom_score on php-fpm on Debian 9 can be set via systemd
+- name: Copy local-oom_score_adj-php-fpm cronjob
+  copy: src=local-oom_score_adj-php-fpm dest=/etc/cron.hourly/ mode=755
+
