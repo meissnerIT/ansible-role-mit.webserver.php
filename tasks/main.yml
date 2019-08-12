@@ -15,10 +15,16 @@
 - name: Copy config file to /etc/nginx/conf.d/
   copy: src={{ item }} dest=/etc/nginx/conf.d/
   with_items:
-    - local-php-v2.include
-    - local-wordpress.include
+    - local-mit-php.include
+    - local-mit-wordpress.include
     - local-mit-nextcloud.include
   when: nginx_conf.stat.exists
+
+- name: Check deprecated files
+  command: ls /etc/nginx/conf.d/local-php-v2.include /etc/nginx/conf.d/local-wordpress.include
+  register: cmd_ls
+  failed_when: cmd_ls.rc == 0
+  changed_when: no
 
 # oom_score on php-fpm on Debian 9 can be set via systemd
 - name: Copy local-oom_score_adj-php-fpm cronjob

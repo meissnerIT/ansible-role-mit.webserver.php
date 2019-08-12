@@ -21,7 +21,7 @@
         try_files $uri $uri/ /index.php?$args;
     }
 
-    include conf.d/local-php-v2.include;
+    include conf.d/local-mit-php.include;
 
     location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
         expires max;
