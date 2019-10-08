@@ -12,21 +12,45 @@
   notify: Restart apache
   when: apache_conf.stat.exists
 
+# local-php-owncloud.include / local-mit-php-nextcloud.include can be replaced by local-php-9000.include
+#- name: Copy config file to /etc/apache2/conf-available/
+#  copy: src={{ item }} dest=/etc/apache2/conf-available/
+#  with_items:
+#    - apache/local-mit-php-nextcloud.include
+#  when: apache_conf.stat.exists
+
 - name: Copy config file to /etc/nginx/conf.d/
   copy: src={{ item }} dest=/etc/nginx/conf.d/
   with_items:
-    - local-mit-php.include
-    - local-mit-wordpress.include
-    - local-mit-nextcloud.include
+    - nginx/local-mit-php.include
+    - nginx/local-mit-wordpress.include
+    - nginx/local-mit-nextcloud.include
   when: nginx_conf.stat.exists
+
+- name: Check deprecated files
+  command: ls /etc/apache2/conf-available/local-php-owncloud.include
+  register: cmd_ls
+  failed_when: cmd_ls.rc == 0
+  changed_when: no
+  when: apache_conf.stat.exists
 
 - name: Check deprecated files
   command: ls /etc/nginx/conf.d/local-php-v2.include /etc/nginx/conf.d/local-wordpress.include
   register: cmd_ls
   failed_when: cmd_ls.rc == 0
   changed_when: no
+  when: nginx_conf.stat.exists
 
 # oom_score on php-fpm on Debian 9 can be set via systemd
 - name: Copy local-oom_score_adj-php-fpm cronjob
   copy: src=local-oom_score_adj-php-fpm dest=/etc/cron.hourly/ mode=755
+
+- name: Copy update-facls
+  copy: src=update-facls dest=/usr/local/sbin/ mode=0755
+
+- name: Activate update-facls in cron.daily (link)
+  file:
+    src:  ../../usr/local/sbin/update-facls
+    dest: /etc/cron.daily/local-update-facls
+    state: link
 
