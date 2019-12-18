@@ -24,7 +24,8 @@
   with_items:
     - nginx/local-mit-php.include
     - nginx/local-mit-wordpress.include
-    - nginx/local-mit-nextcloud.include
+    - nginx/local-mit-nextcloud-16.include
+    - nginx/local-mit-nextcloud-17.include
   when: nginx_conf.stat.exists
 
 - name: Check deprecated files
@@ -35,9 +36,9 @@
   when: apache_conf.stat.exists
 
 - name: Check deprecated files
-  command: ls /etc/nginx/conf.d/local-php-v2.include /etc/nginx/conf.d/local-wordpress.include
+  command: find /etc/nginx/conf.d/ -name local-mit-nextcloud.include -o -name local-php-v2.include -o -name local-wordpress.include
   register: cmd_ls
-  failed_when: cmd_ls.rc == 0
+  failed_when: cmd_ls.stdout
   changed_when: no
   when: nginx_conf.stat.exists
 
