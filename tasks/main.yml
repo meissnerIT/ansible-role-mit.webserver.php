@@ -10,7 +10,7 @@
 - template: src=local-php.include dest=/etc/apache2/conf-available/local-php-{{ item }}.include
   with_items: "{{mit_php_fpm_ports}}"
   notify: Restart apache
-  when: apache_conf.stat.exists
+  when: mit_php_fpm_ports is defined and apache_conf.stat.exists
 
 # local-php-owncloud.include / local-mit-php-nextcloud.include can be replaced by local-php-9000.include
 #- name: Copy config file to /etc/apache2/conf-available/
