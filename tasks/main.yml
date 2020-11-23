@@ -9,7 +9,7 @@
 # myhost.meissner.it mit_php_fpm_ports=9000,9001,9002,9003
 - template: src=local-php.include dest=/etc/apache2/conf-available/local-php-{{ item }}.include
   with_items: "{{mit_php_fpm_ports}}"
-  notify: Restart apache
+  notify: Reload apache
   when: mit_php_fpm_ports is defined and apache_conf.stat.exists
 
 # local-php-owncloud.include / local-mit-php-nextcloud.include can be replaced by local-php-9000.include
