@@ -12,7 +12,7 @@
 # Calling with parameter "dir" processes only the specified directory (which 
 # still must be set in /etc/update-facls.conf).
 #
-# v2020-04-08-1, markus.meissner@meissner.IT
+# v2021-03-16-1, markus.meissner@meissner.IT
 
 # exit on error (equals set -o errexit)
 set -e
@@ -32,7 +32,7 @@ function updateFacls {
 
     find ${DIR} -type f -exec setfacl -m g:${GROUP}:rw {} \;
     find ${DIR} -type d \
-            -exec chmod g+rwx {} \; \
+            -exec chmod ug+rwx {} \; \
             -exec setfacl -m g:${GROUP}:rwx {} \; \
             -exec setfacl -d -m g:${GROUP}:rwx {} \;
 }
