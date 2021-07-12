@@ -22,11 +22,12 @@
 - name: Copy config file to /etc/nginx/conf.d/
   copy: src={{ item }} dest=/etc/nginx/conf.d/
   with_items:
-    - nginx/local-mit-php.include
-    - nginx/local-mit-wordpress.include
+    - nginx/local-mit-matomo-4.include
     - nginx/local-mit-nextcloud-16.include
     - nginx/local-mit-nextcloud-17.include
     - nginx/local-mit-nextcloud-17-3.include
+    - nginx/local-mit-php.include
+    - nginx/local-mit-wordpress.include
   when: nginx_conf.stat.exists
 
 - name: Check deprecated files
