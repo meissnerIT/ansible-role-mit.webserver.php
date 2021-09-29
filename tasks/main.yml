@@ -26,6 +26,7 @@
     - nginx/local-mit-nextcloud-16.include
     - nginx/local-mit-nextcloud-17.include
     - nginx/local-mit-nextcloud-17-3.include
+    - nginx/local-mit-nextcloud-21.include
     - nginx/local-mit-php.include
     - nginx/local-mit-wordpress.include
   when: nginx_conf.stat.exists
