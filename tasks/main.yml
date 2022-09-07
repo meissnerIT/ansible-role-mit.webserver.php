@@ -58,3 +58,12 @@
     dest: /etc/cron.daily/local-update-facls
     state: link
 
+- name: Copy sudoers configuration
+  copy:
+    src: sudoers.d-{{ item }}
+    dest: /etc/sudoers.d/{{ item }}
+    mode: 0440
+    validate: 'visudo -cf %s'
+  with_items:
+    - local-mit-webmaster
+
