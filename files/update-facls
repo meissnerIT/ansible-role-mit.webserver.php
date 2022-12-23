@@ -9,10 +9,10 @@
 # /srv/www/monheim.de/www-dev/htdocs www-dev monheim
 #
 # Calling without parameters processes all configured directories.
-# Calling with parameter "dir" processes only the specified directory (which 
+# Calling with parameter "dir" processes only the specified directories (which
 # still must be set in /etc/update-facls.conf).
 #
-# v2021-03-16-1, markus.meissner@meissner.IT
+# v2022-12-15-1, markus.meissner@meissner.IT
 
 # exit on error (equals set -o errexit)
 set -e
@@ -43,13 +43,18 @@ if [ -z "$1" ]; then
         updateFacls ${array[0]} ${array[1]} ${array[2]}
     done < /etc/update-facls.conf
 else
-    line=$(egrep "^$1" /etc/update-facls.conf | head -n1)
-    if [ -z "${line}" ]; then
+    processed=0
+    while read -r line; do
+        if [[ "$line" =~ ^$1.* ]]; then
+            IFS=' ' read -a array <<< "$line"
+            echo "Processing '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
+            updateFacls ${array[0]} ${array[1]} ${array[2]}
+            processed=1
+        fi
+    done < /etc/update-facls.conf
+    if [[ "$processed" -eq 0 ]]; then
         echo "Could not read '$1' from /etc/update-facls.conf"
         exit 1
     fi
-    IFS=' ' read -a array <<< "$line"
-    echo "Processing '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
-    updateFacls ${array[0]} ${array[1]} ${array[2]}
 fi
 
