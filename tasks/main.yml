@@ -5,6 +5,14 @@
 - stat: path=/etc/nginx/conf.d
   register: nginx_conf
 
+- name: Set locales
+  lineinfile:
+    path: /etc/locale.gen
+    search_string: "{{ locale_append }}"
+    line: "{{ locale_append }}"
+  notify: locale-gen
+  when: locale_append is defined
+
 # This works with a host variable like this:
 # myhost.meissner.it mit_php_fpm_ports=9000,9001,9002,9003
 - template: src=local-php.include dest=/etc/apache2/conf-available/local-php-{{ item }}.include
@@ -23,10 +31,8 @@
   copy: src={{ item }} dest=/etc/nginx/conf.d/
   with_items:
     - nginx/local-mit-matomo-4.include
-    - nginx/local-mit-nextcloud-16.include
-    - nginx/local-mit-nextcloud-17.include
-    - nginx/local-mit-nextcloud-17-3.include
     - nginx/local-mit-nextcloud-21.include
+    - nginx/local-mit-nextcloud-24.include
     - nginx/local-mit-php.include
     - nginx/local-mit-wordpress.include
   when: nginx_conf.stat.exists
@@ -44,6 +50,15 @@
   failed_when: cmd_ls.stdout
   changed_when: no
   when: nginx_conf.stat.exists
+
+- name: Remove deprecated files
+  file:
+    path: /etc/nginx/conf.d/{{ item }}
+    state: absent
+  with_items:
+    - local-mit-nextcloud-16.include
+    - local-mit-nextcloud-17.include
+    - local-mit-nextcloud-17-3.include
 
 # oom_score on php-fpm on Debian 9 can be set via systemd
 - name: Copy local-oom_score_adj-php-fpm cronjob
