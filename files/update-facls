@@ -12,7 +12,7 @@
 # Calling with parameter "dir" processes only the specified directories (which
 # still must be set in /etc/update-facls.conf).
 #
-# v2022-12-15-1, markus.meissner@meissner.IT
+# v2023-09-13-1, markus.meissner@meissner.IT
 
 # exit on error (equals set -o errexit)
 set -e
@@ -27,7 +27,11 @@ function updateFacls {
     OWNER=$2
     GROUP=$3
     cd ${DIR}
-    chown -R ${OWNER}:${GROUP} ${DIR}
+    if [[ "${OWNER}" = "donotchange" ]]; then
+        chgrp -R ${GROUP} ${DIR}
+    else
+        chown -R ${OWNER}:${GROUP} ${DIR}
+    fi
     chmod -R o-w ${DIR}
 
     find ${DIR} -type f -exec setfacl -m g:${GROUP}:rw {} \;
