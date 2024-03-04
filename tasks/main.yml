@@ -63,16 +63,28 @@
 
 # oom_score on php-fpm on Debian 9 can be set via systemd
 - name: Copy local-oom_score_adj-php-fpm cronjob
-  copy: src=local-oom_score_adj-php-fpm dest=/etc/cron.hourly/ mode=755
+  copy:
+    src: local-oom_score_adj-php-fpm
+    dest: /etc/cron.hourly/
+    mode: "0755"
 
 - name: Copy update-facls
-  copy: src=update-facls dest=/usr/local/sbin/ mode=0755
+  copy:
+    src: update-facls
+    dest: /usr/local/sbin/
+    mode: "0755"
 
 - name: Activate update-facls in cron.daily (link)
   file:
     src:  ../../usr/local/sbin/update-facls
     dest: /etc/cron.daily/local-update-facls
     state: link
+
+- name: Copy php-switch-version
+  copy:
+    src: php-switch-version
+    dest: /usr/local/bin/
+    mode: "0755"
 
 - name: Copy sudoers configuration
   copy:
