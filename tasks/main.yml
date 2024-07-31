@@ -33,6 +33,7 @@
     - nginx/local-mit-matomo-4.include
     - nginx/local-mit-nextcloud-24.include
     - nginx/local-mit-nextcloud-26.include
+    - nginx/local-mit-nextcloud-28.include
     - nginx/local-mit-php.include
     - nginx/local-mit-wordpress.include
   when: nginx_conf.stat.exists
