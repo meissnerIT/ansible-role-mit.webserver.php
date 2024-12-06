@@ -1,12 +1,13 @@
 ---
-
-- stat: path=/etc/apache2/conf-enabled
+- ansible.builtin.stat:
+    path: /etc/apache2/conf-enabled
   register: apache_conf
-- stat: path=/etc/nginx/conf.d
+- ansible.builtin.stat:
+    path: /etc/nginx/conf.d
   register: nginx_conf
 
 - name: Set locales
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/locale.gen
     search_string: "{{ locale_append }}"
     line: "{{ locale_append }}"
@@ -15,8 +16,10 @@
 
 # This works with a host variable like this:
 # myhost.meissner.it mit_php_fpm_ports=9000,9001,9002,9003
-- template: src=local-php.include dest=/etc/apache2/conf-available/local-php-{{ item }}.include
-  with_items: "{{mit_php_fpm_ports}}"
+- ansible.builtin.template:
+    src: local-php.include
+    dest: /etc/apache2/conf-available/local-php-{{ item }}.include
+  with_items: "{{ mit_php_fpm_ports }}"
   notify: Reload apache
   when: mit_php_fpm_ports is defined and apache_conf.stat.exists
 
@@ -28,7 +31,9 @@
 #  when: apache_conf.stat.exists
 
 - name: Copy config file to /etc/nginx/conf.d/
-  copy: src={{ item }} dest=/etc/nginx/conf.d/
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/nginx/conf.d/
   with_items:
     - nginx/local-mit-matomo-4.include
     - nginx/local-mit-nextcloud-24.include
@@ -39,21 +44,21 @@
   when: nginx_conf.stat.exists
 
 - name: Check deprecated files
-  command: ls /etc/apache2/conf-available/local-php-owncloud.include
+  ansible.builtin.command: ls /etc/apache2/conf-available/local-php-owncloud.include
   register: cmd_ls
   failed_when: cmd_ls.rc == 0
-  changed_when: no
+  changed_when: false
   when: apache_conf.stat.exists
 
 - name: Check deprecated files
-  command: find /etc/nginx/conf.d/ -name local-mit-nextcloud.include -o -name local-php-v2.include -o -name local-wordpress.include
+  ansible.builtin.command: find /etc/nginx/conf.d/ -name local-mit-nextcloud.include -o -name local-php-v2.include -o -name local-wordpress.include
   register: cmd_ls
   failed_when: cmd_ls.stdout
-  changed_when: no
+  changed_when: false
   when: nginx_conf.stat.exists
 
 - name: Remove deprecated files
-  file:
+  ansible.builtin.file:
     path: /etc/nginx/conf.d/{{ item }}
     state: absent
   with_items:
@@ -64,35 +69,34 @@
 
 # oom_score on php-fpm on Debian 9 can be set via systemd
 - name: Copy local-oom_score_adj-php-fpm cronjob
-  copy:
+  ansible.builtin.copy:
     src: local-oom_score_adj-php-fpm
     dest: /etc/cron.hourly/
     mode: "0755"
 
 - name: Copy update-facls
-  copy:
+  ansible.builtin.copy:
     src: update-facls
     dest: /usr/local/sbin/
     mode: "0755"
 
 - name: Activate update-facls in cron.daily (link)
-  file:
-    src:  ../../usr/local/sbin/update-facls
+  ansible.builtin.file:
+    src: ../../usr/local/sbin/update-facls
     dest: /etc/cron.daily/local-update-facls
     state: link
 
 - name: Copy php-switch-version
-  copy:
+  ansible.builtin.copy:
     src: php-switch-version
     dest: /usr/local/bin/
     mode: "0755"
 
 - name: Copy sudoers configuration
-  copy:
-    src: sudoers.d-{{ item }}
-    dest: /etc/sudoers.d/{{ item }}
-    mode: 0440
-    validate: 'visudo -cf %s'
+  ansible.builtin.copy:
+    src: sudoers.d/{{ item }}
+    dest: /etc/sudoers.d/
+    mode: "0440"
+    validate: visudo -cf %s
   with_items:
     - local-mit-webmaster
-

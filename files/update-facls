@@ -6,7 +6,7 @@
 # Sets correct file permissions for shared web projects.
 #
 # Create /etc/update-facls.conf with dir, user and group, e.g.:
-# /srv/www/monheim.de/www-dev/htdocs www-dev monheim
+# /srv/www/www.my.tld/htdocs myuser mygroup
 #
 # Calling without parameters processes all configured directories.
 # Calling with parameter "dir" processes only the specified directories (which
@@ -61,4 +61,3 @@ else
         exit 1
     fi
 fi
-
