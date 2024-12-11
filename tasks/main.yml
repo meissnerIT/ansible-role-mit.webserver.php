@@ -35,7 +35,7 @@
     src: "{{ item }}"
     dest: /etc/nginx/conf.d/
   with_items:
-    - nginx/local-mit-matomo-4.include
+    - nginx/local-mit-matomo-5.include
     - nginx/local-mit-nextcloud-24.include
     - nginx/local-mit-nextcloud-26.include
     - nginx/local-mit-nextcloud-28.include
@@ -62,6 +62,7 @@
     path: /etc/nginx/conf.d/{{ item }}
     state: absent
   with_items:
+    - local-mit-matomo-4.include
     - local-mit-nextcloud-16.include
     - local-mit-nextcloud-17.include
     - local-mit-nextcloud-17-3.include
