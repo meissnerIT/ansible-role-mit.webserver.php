@@ -6,13 +6,16 @@
 # Sets correct file permissions for shared web projects.
 #
 # Create /etc/update-facls.conf with dir, user and group, e.g.:
-# /srv/www/www.my.tld/htdocs myuser mygroup
+# /srv/www/monheim.de/www-dev/htdocs www-dev monheim
 #
-# Calling without parameters processes all configured directories.
-# Calling with parameter "dir" processes only the specified directories (which
-# still must be set in /etc/update-facls.conf).
+# - Calling without parameters processes all configured directories.
+# - Calling with parameter "dir" processes only the specified directory (which
+#     still must be set in /etc/update-facls.conf).
+# - Calling with parameter "dir" and "--updateOwnerAndGroupOnly" updates only
+#     the owner and group of the the specified directory.
 #
-# v2023-09-13-1, markus.meissner@meissner.IT
+# 2023-09-13, markus.meissner@meissner.IT
+# 2024-12-13: Added parameter --updateOwnerAndGroupOnly
 
 # exit on error (equals set -o errexit)
 set -e
@@ -20,7 +23,7 @@ set -e
 # No config file no work to do
 [ -f /etc/update-facls.conf ] || exit 0
 
-function updateFacls {
+function updateOwnerAndGroup {
     # exit if variable is unset
     set -u
     DIR=$1
@@ -32,8 +35,16 @@ function updateFacls {
     else
         chown -R ${OWNER}:${GROUP} ${DIR}
     fi
-    chmod -R o-w ${DIR}
+}
 
+function updateFacls {
+    # exit if variable is unset
+    set -u
+    DIR=$1
+    OWNER=$2
+    GROUP=$3
+    cd ${DIR}
+    chmod -R o-w ${DIR}
     find ${DIR} -type f -exec setfacl -m g:${GROUP}:rw {} \;
     find ${DIR} -type d \
             -exec chmod ug+rwx {} \; \
@@ -44,6 +55,7 @@ function updateFacls {
 if [ -z "$1" ]; then
     while read -r line; do
         IFS=' ' read -a array <<< "$line"
+        updateOwnerAndGroup ${array[0]} ${array[1]} ${array[2]}
         updateFacls ${array[0]} ${array[1]} ${array[2]}
     done < /etc/update-facls.conf
 else
@@ -51,8 +63,17 @@ else
     while read -r line; do
         if [[ "$line" =~ ^$1.* ]]; then
             IFS=' ' read -a array <<< "$line"
-            echo "Processing '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
-            updateFacls ${array[0]} ${array[1]} ${array[2]}
+            if [ -z $2 ]; then
+                echo "Updating owner, group and facls of '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
+                updateOwnerAndGroup ${array[0]} ${array[1]} ${array[2]}
+                updateFacls ${array[0]} ${array[1]} ${array[2]}
+            elif [[ "$2" = "--updateOwnerAndGroupOnly" ]]; then
+                echo "Updating owner and group of '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
+                updateOwnerAndGroup ${array[0]} ${array[1]} ${array[2]}
+            else
+                echo "Unknown option $2"
+                exit 1
+            fi
             processed=1
         fi
     done < /etc/update-facls.conf
