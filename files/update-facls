@@ -16,6 +16,7 @@
 #
 # 2023-09-13, markus.meissner@meissner.IT
 # 2024-12-13: Added parameter --updateOwnerAndGroupOnly
+# 2025-01-16: Fixed issue with multipe directories and parameter 2
 
 # exit on error (equals set -o errexit)
 set -e
@@ -60,18 +61,19 @@ if [ -z "$1" ]; then
     done < /etc/update-facls.conf
 else
     processed=0
+    p2="$2"
     while read -r line; do
         if [[ "$line" =~ ^$1.* ]]; then
             IFS=' ' read -a array <<< "$line"
-            if [ -z $2 ]; then
+            if [ -z "$p2" ]; then
                 echo "Updating owner, group and facls of '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
                 updateOwnerAndGroup ${array[0]} ${array[1]} ${array[2]}
                 updateFacls ${array[0]} ${array[1]} ${array[2]}
-            elif [[ "$2" = "--updateOwnerAndGroupOnly" ]]; then
+            elif [[ "$p2" = "--updateOwnerAndGroupOnly" ]]; then
                 echo "Updating owner and group of '${array[0]}' with user '${array[1]}' and group '${array[2]}'"
                 updateOwnerAndGroup ${array[0]} ${array[1]} ${array[2]}
             else
-                echo "Unknown option $2"
+                echo "Unknown option $p2"
                 exit 1
             fi
             processed=1
