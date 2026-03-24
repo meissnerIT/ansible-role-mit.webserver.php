@@ -22,7 +22,7 @@
   ansible.builtin.template:
     src: local-php.include
     dest: /etc/apache2/conf-available/local-php-{{ item }}.include
-    mode: "644"
+    mode: "0644"
   with_items: "{{ mit_php_fpm_ports }}"
   notify: Reload apache
   when: mit_php_fpm_ports is defined and apache_conf.stat.exists
@@ -38,12 +38,11 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: /etc/nginx/conf.d/
-    mode: "644"
+    mode: "0644"
   with_items:
     - nginx/local-mit-matomo-5.include
-    - nginx/local-mit-nextcloud-24.include
-    - nginx/local-mit-nextcloud-26.include
     - nginx/local-mit-nextcloud-28.include
+    - nginx/local-mit-nextcloud-32.include
     - nginx/local-mit-php.include
     - nginx/local-mit-wordpress.include
   when: nginx_conf.stat.exists
